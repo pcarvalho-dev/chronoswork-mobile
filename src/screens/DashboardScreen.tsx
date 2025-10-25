@@ -181,21 +181,27 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     const photos: PhotoData[] = [];
 
     if (log.checkInPhoto) {
-      photos.push({
-        url: `${api.baseURL}${log.checkInPhoto}`,
-        title: 'Entrada',
-        timestamp: log.checkIn,
-        type: 'checkin',
-      });
+      const checkInUrl = api.getPhotoUrl(log.checkInPhoto);
+      if (checkInUrl) {
+        photos.push({
+          url: checkInUrl,
+          title: 'Entrada',
+          timestamp: log.checkIn,
+          type: 'checkin',
+        });
+      }
     }
 
     if (log.checkOutPhoto) {
-      photos.push({
-        url: `${api.baseURL}${log.checkOutPhoto}`,
-        title: 'Saída',
-        timestamp: log.checkOut!,
-        type: 'checkout',
-      });
+      const checkOutUrl = api.getPhotoUrl(log.checkOutPhoto);
+      if (checkOutUrl) {
+        photos.push({
+          url: checkOutUrl,
+          title: 'Saída',
+          timestamp: log.checkOut!,
+          type: 'checkout',
+        });
+      }
     }
 
     if (photos.length === 0) return;

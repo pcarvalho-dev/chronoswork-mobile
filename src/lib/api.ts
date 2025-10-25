@@ -366,6 +366,17 @@ class ApiClient {
   async getTimeLogs(): Promise<TimeLog[]> {
     return this.request<TimeLog[]>('/timelog', {}, true);
   }
+
+  // Helper function to build correct photo URLs (handles both local and Cloudinary URLs)
+  getPhotoUrl(photoPath: string | null | undefined): string | null {
+    if (!photoPath) return null;
+    // If it's already a full URL (Cloudinary), return as is
+    if (photoPath.startsWith('http://') || photoPath.startsWith('https://')) {
+      return photoPath;
+    }
+    // Otherwise, it's a local path, prepend the API URL
+    return `${this.baseURL}${photoPath}`;
+  }
 }
 
 // Export singleton instance
