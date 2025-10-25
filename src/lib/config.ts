@@ -65,7 +65,7 @@ const getApiUrl = () => {
   }
 
   // Production: use your actual API URL
-  return `https://your-production-api.com`;
+  return 'https://chronos-work.onrender.com';
 };
 
 export const API_URL = getApiUrl();
