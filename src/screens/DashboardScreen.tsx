@@ -7,8 +7,11 @@ import {
   RefreshControl,
   TouchableOpacity,
   Alert,
+  Linking,
+  Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
@@ -123,23 +126,25 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
           'Permissão Negada',
           'Precisamos de acesso à localização para registrar seu ponto'
         );
+        setActionLoading(false);
         return;
       }
 
-      // Get current location
+      // Get current location with faster settings
       console.log('📍 Getting current location...');
       const location = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
+        accuracy: Location.Accuracy.Low, // Changed to Low for faster GPS
+        timeInterval: 1000,
+        distanceInterval: 0,
       });
       console.log('✅ Location obtained:', location.coords.latitude, location.coords.longitude);
 
       // Call API with photo and location
+      console.log('📤 Uploading...');
       if (cameraAction === 'checkin') {
-        console.log('📸 Sending check-in with photo and GPS...');
         await api.checkIn(photo, location.coords.latitude, location.coords.longitude);
         Alert.alert('Sucesso', 'Entrada registrada com sucesso!');
       } else {
-        console.log('📸 Sending check-out with photo and GPS...');
         await api.checkOut(photo, location.coords.latitude, location.coords.longitude);
         Alert.alert('Sucesso', 'Saída registrada com sucesso!');
       }
@@ -201,6 +206,29 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     setShowPhotoViewer(true);
   };
 
+  const handleOpenLocation = (latitude: number, longitude: number, type: 'checkin' | 'checkout') => {
+    const label = type === 'checkin' ? 'Entrada' : 'Saída';
+
+    // Different URL schemes for iOS and Android
+    const scheme = Platform.select({
+      ios: `maps:0,0?q=${label}@${latitude},${longitude}`,
+      android: `geo:0,0?q=${latitude},${longitude}(${label})`,
+    });
+
+    // Fallback to Google Maps web if native app fails
+    const fallbackUrl = `https://www.google.com/maps/search/?api=1&query=${latitude},${longitude}`;
+
+    Linking.canOpenURL(scheme!).then((supported) => {
+      if (supported) {
+        Linking.openURL(scheme!);
+      } else {
+        Linking.openURL(fallbackUrl);
+      }
+    }).catch(() => {
+      Alert.alert('Erro', 'Não foi possível abrir o aplicativo de mapas');
+    });
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('pt-BR', {
       day: '2-digit',
@@ -215,8 +243,11 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     const end = checkOut ? new Date(checkOut).getTime() : Date.now();
     const durationMs = end - start;
 
-    const hours = Math.floor(durationMs / (1000 * 60 * 60));
-    const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+    // Prevent negative values (can happen due to server/client clock drift)
+    const safeDurationMs = Math.max(0, durationMs);
+
+    const hours = Math.floor(safeDurationMs / (1000 * 60 * 60));
+    const minutes = Math.floor((safeDurationMs % (1000 * 60 * 60)) / (1000 * 60));
 
     return `${hours}h ${minutes}m`;
   };
@@ -236,7 +267,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     const totalMs = completedLogs.reduce((total, log) => {
       const start = new Date(log.checkIn).getTime();
       const end = new Date(log.checkOut!).getTime();
-      return total + (end - start);
+      const duration = Math.max(0, end - start); // Prevent negative durations
+      return total + duration;
     }, 0);
 
     const hours = Math.floor(totalMs / (1000 * 60 * 60));
@@ -252,14 +284,12 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     const checkpointTime = new Date(lastCheckpoint).getTime();
     const diffMs = now - checkpointTime;
 
-    // Prevent negative values
-    if (diffMs < 0) {
-      console.warn('⚠️ Negative time diff detected:', { now, checkpointTime, lastCheckpoint });
-      return '0h 0m';
-    }
+    // Prevent negative values (can happen due to server/client clock drift)
+    // Use Math.max to ensure we never calculate with negative values
+    const safeDiffMs = Math.max(0, diffMs);
 
-    const hours = Math.floor(diffMs / (1000 * 60 * 60));
-    const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const hours = Math.floor(safeDiffMs / (1000 * 60 * 60));
+    const minutes = Math.floor((safeDiffMs % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
   };
 
@@ -285,7 +315,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
       if (currentLog.checkOut) {
         const breakStart = new Date(currentLog.checkOut).getTime();
         const breakEnd = new Date(nextLog.checkIn).getTime();
-        totalBreakMs += breakEnd - breakStart;
+        const breakDuration = Math.max(0, breakEnd - breakStart); // Prevent negative breaks
+        totalBreakMs += breakDuration;
       }
     }
 
@@ -309,7 +340,8 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
     const totalWorkedMs = completedLogs.reduce((total, log) => {
       const start = new Date(log.checkIn).getTime();
       const end = new Date(log.checkOut!).getTime();
-      return total + (end - start);
+      const duration = Math.max(0, end - start); // Prevent negative durations
+      return total + duration;
     }, 0);
 
     // Calculate expected hours (8h per working day)
@@ -399,7 +431,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
               </View>
 
               <View style={styles.sessionInfo}>
-                <Text style={styles.sessionLabel}>Iniciado em:</Text>
+                <View style={styles.sessionInfoHeader}>
+                  <Text style={styles.sessionLabel}>Iniciado em:</Text>
+                  {currentSession.checkInLatitude && currentSession.checkInLongitude && (
+                    <TouchableOpacity
+                      onPress={() => handleOpenLocation(currentSession.checkInLatitude, currentSession.checkInLongitude, 'checkin')}
+                      style={styles.iconButton}
+                    >
+                      <Ionicons name="location-outline" size={16} color="#16a34a" />
+                    </TouchableOpacity>
+                  )}
+                </View>
                 <Text style={styles.sessionValue}>{formatDate(currentSession.checkIn)}</Text>
               </View>
 
@@ -517,9 +559,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
                       {log.checkInPhoto && (
                         <TouchableOpacity
                           onPress={() => handleViewPhoto(log, 'checkin')}
-                          style={styles.photoIcon}
+                          style={styles.iconButton}
                         >
-                          <Text style={styles.photoIconText}>📷</Text>
+                          <Ionicons name="camera-outline" size={16} color={colors.primary[600]} />
+                        </TouchableOpacity>
+                      )}
+                      {log.checkInLatitude && log.checkInLongitude && (
+                        <TouchableOpacity
+                          onPress={() => handleOpenLocation(log.checkInLatitude, log.checkInLongitude, 'checkin')}
+                          style={styles.iconButton}
+                        >
+                          <Ionicons name="location-outline" size={16} color="#16a34a" />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -532,9 +582,17 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
                       {log.checkOutPhoto && (
                         <TouchableOpacity
                           onPress={() => handleViewPhoto(log, 'checkout')}
-                          style={styles.photoIcon}
+                          style={styles.iconButton}
                         >
-                          <Text style={styles.photoIconText}>📷</Text>
+                          <Ionicons name="camera-outline" size={16} color={colors.primary[600]} />
+                        </TouchableOpacity>
+                      )}
+                      {log.checkOutLatitude && log.checkOutLongitude && (
+                        <TouchableOpacity
+                          onPress={() => handleOpenLocation(log.checkOutLatitude!, log.checkOutLongitude!, 'checkout')}
+                          style={styles.iconButton}
+                        >
+                          <Ionicons name="location-outline" size={16} color="#dc2626" />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -631,10 +689,15 @@ const styles = StyleSheet.create({
   sessionInfo: {
     marginBottom: spacing.md,
   },
+  sessionInfoHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginBottom: spacing.xs,
+  },
   sessionLabel: {
     fontSize: fontSize.sm,
     color: colors.warmGrey[600],
-    marginBottom: spacing.xs,
   },
   sessionValue: {
     fontSize: fontSize.base,
@@ -776,11 +839,12 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.warmGrey[600],
   },
-  photoIcon: {
+  iconButton: {
     padding: spacing.xs,
-  },
-  photoIconText: {
-    fontSize: fontSize.base,
+    borderRadius: borderRadius.md,
+    backgroundColor: colors.white + '40',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   logDetailValue: {
     fontSize: fontSize.sm,

@@ -246,7 +246,7 @@ class ApiClient {
     console.log('📦 Headers:', headers);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for photo upload
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s for compressed photo upload
 
     try {
       const response = await fetch(`${this.baseURL}/timelog/checkin`, {
@@ -255,7 +255,7 @@ class ApiClient {
         body: formData,
         signal: controller.signal,
         // @ts-ignore - React Native specific options
-        ...(Platform.OS === 'ios' ? { timeout: 60000 } : {}),
+        ...(Platform.OS === 'ios' ? { timeout: 20000 } : {}),
       });
 
       clearTimeout(timeoutId);
@@ -321,7 +321,7 @@ class ApiClient {
     console.log('📦 Headers:', headers);
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s for photo upload
+    const timeoutId = setTimeout(() => controller.abort(), 20000); // 20s for compressed photo upload
 
     try {
       const response = await fetch(`${this.baseURL}/timelog/checkout`, {
@@ -330,7 +330,7 @@ class ApiClient {
         body: formData,
         signal: controller.signal,
         // @ts-ignore - React Native specific options
-        ...(Platform.OS === 'ios' ? { timeout: 60000 } : {}),
+        ...(Platform.OS === 'ios' ? { timeout: 20000 } : {}),
       });
 
       clearTimeout(timeoutId);

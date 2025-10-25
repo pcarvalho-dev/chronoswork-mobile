@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { colors, spacing, fontSize, fontWeight, borderRadius } from '../theme';
 
 interface CameraCaptureProps {
@@ -35,12 +36,22 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
     try {
       setIsProcessing(true);
+
+      // Capture photo with lower quality for faster processing
       const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.8,
+        quality: 0.5,
+        skipProcessing: true,
       });
 
       if (photo) {
-        setCapturedPhoto(photo.uri);
+        // Compress and resize image for faster upload
+        const manipulatedImage = await ImageManipulator.manipulateAsync(
+          photo.uri,
+          [{ resize: { width: 800 } }], // Resize to max width of 800px
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        );
+
+        setCapturedPhoto(manipulatedImage.uri);
       }
     } catch (error) {
       console.error('Error taking photo:', error);
