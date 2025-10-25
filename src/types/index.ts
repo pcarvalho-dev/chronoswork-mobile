@@ -16,10 +16,10 @@ export interface TimeLog {
   checkOut: string | null;
   checkInPhoto: string;
   checkOutPhoto: string | null;
-  checkInLatitude: number;
-  checkInLongitude: number;
-  checkOutLatitude: number | null;
-  checkOutLongitude: number | null;
+  latitude: number;
+  longitude: number;
+  outLatitude: number | null;
+  outLongitude: number | null;
   user?: User;
   createdAt: string;
   updatedAt: string;

@@ -439,9 +439,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
               <View style={styles.sessionInfo}>
                 <View style={styles.sessionInfoHeader}>
                   <Text style={styles.sessionLabel}>Iniciado em:</Text>
-                  {currentSession.checkInLatitude && currentSession.checkInLongitude && (
+                  {currentSession.latitude && currentSession.longitude && (
                     <TouchableOpacity
-                      onPress={() => handleOpenLocation(currentSession.checkInLatitude, currentSession.checkInLongitude, 'checkin')}
+                      onPress={() => handleOpenLocation(currentSession.latitude, currentSession.longitude, 'checkin')}
                       style={styles.iconButton}
                     >
                       <Ionicons name="location-outline" size={16} color="#16a34a" />
@@ -570,9 +570,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
                           <Ionicons name="camera-outline" size={16} color={colors.primary[600]} />
                         </TouchableOpacity>
                       )}
-                      {log.checkInLatitude && log.checkInLongitude && (
+                      {log.latitude && log.longitude && (
                         <TouchableOpacity
-                          onPress={() => handleOpenLocation(log.checkInLatitude, log.checkInLongitude, 'checkin')}
+                          onPress={() => handleOpenLocation(log.latitude, log.longitude, 'checkin')}
                           style={styles.iconButton}
                         >
                           <Ionicons name="location-outline" size={16} color="#16a34a" />
@@ -593,9 +593,9 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
                           <Ionicons name="camera-outline" size={16} color={colors.primary[600]} />
                         </TouchableOpacity>
                       )}
-                      {log.checkOutLatitude && log.checkOutLongitude && (
+                      {log.outLatitude && log.outLongitude && (
                         <TouchableOpacity
-                          onPress={() => handleOpenLocation(log.checkOutLatitude!, log.checkOutLongitude!, 'checkout')}
+                          onPress={() => handleOpenLocation(log.outLatitude!, log.outLongitude!, 'checkout')}
                           style={styles.iconButton}
                         >
                           <Ionicons name="location-outline" size={16} color="#dc2626" />

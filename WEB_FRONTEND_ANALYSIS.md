@@ -311,15 +311,15 @@ colors: {
 1. `POST /timelog/checkin`
    - Body: FormData with:
      - `photo` (File)
-     - `checkInLatitude` (string)
-     - `checkInLongitude` (string)
+     - `latitude` (string)
+     - `longitude` (string)
    - Returns: Check-in response
 
 2. `POST /timelog/checkout`
    - Body: FormData with:
      - `photo` (File)
-     - `checkOutLatitude` (string)
-     - `checkOutLongitude` (string)
+     - `latitude` (string)
+     - `longitude` (string)
    - Returns: Check-out response
 
 3. `GET /timelog`
@@ -343,10 +343,10 @@ interface TimeLog {
   checkOut: string | null;            // ISO timestamp or null
   checkInPhoto?: string;              // URL path
   checkOutPhoto?: string;             // URL path
-  checkInLatitude?: number;
-  checkInLongitude?: number;
-  checkOutLatitude?: number;
-  checkOutLongitude?: number;
+  latitude: number;
+  longitude: number;
+  outLatitude: number | null;
+  outLongitude: number | null;
   user?: {
     id: number;
     name: string;

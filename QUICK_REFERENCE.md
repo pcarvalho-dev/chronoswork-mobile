@@ -53,11 +53,11 @@ POST /auth/upload-photo
 ### Time Logging
 ```
 POST /timelog/checkin
-  Input: FormData { photo: File, checkInLatitude, checkInLongitude }
+  Input: FormData { photo: File, latitude, longitude }
   Output: { timeLog data }
 
 POST /timelog/checkout
-  Input: FormData { photo: File, checkOutLatitude, checkOutLongitude }
+  Input: FormData { photo: File, latitude, longitude }
   Output: { timeLog data }
 
 GET /timelog
@@ -76,10 +76,10 @@ GET /timelog
   checkOut: string | null (ISO datetime),
   checkInPhoto: string (URL path),
   checkOutPhoto: string (URL path),
-  checkInLatitude: number,
-  checkInLongitude: number,
-  checkOutLatitude: number,
-  checkOutLongitude: number,
+  latitude: number,
+  longitude: number,
+  outLatitude: number | null,
+  outLongitude: number | null,
   user?: { id, name, email }
 }
 ```
