@@ -4,7 +4,7 @@ import Constants from 'expo-constants';
 // API Configuration
 // IMPORTANT: Update this IP to your computer's local IP address
 // Find your IP: On Linux run: hostname -I | awk '{print $1}'
-const LOCAL_IP = '192.168.1.226'; // Your computer's IP on local network
+const LOCAL_IP = '192.168.1.10'; // Your computer's IP on local network
 const API_PORT = '8000';
 
 const getApiUrl = () => {
@@ -15,6 +15,19 @@ const getApiUrl = () => {
   if (forceLocalIP && manualApiUrl) {
     console.log('🔧 Using manual API URL from .env:', manualApiUrl);
     return manualApiUrl;
+  }
+
+  // Try to detect the correct IP from debugger host
+  const debuggerHost = Constants.expoConfig?.hostUri;
+  if (debuggerHost) {
+    // Extract IP from debugger host (format: IP:PORT)
+    const detectedIP = debuggerHost.split(':')[0];
+    if (detectedIP && detectedIP !== 'localhost' && detectedIP !== '127.0.0.1') {
+      const detectedUrl = `http://${detectedIP}:${API_PORT}`;
+      console.log('🔍 Detected IP from debugger host:', detectedIP);
+      console.log('🔗 Using detected API URL:', detectedUrl);
+      return detectedUrl;
+    }
   }
 
   if (__DEV__) {

@@ -1,3 +1,9 @@
 export { LoginScreen } from './LoginScreen';
 export { RegisterScreen } from './RegisterScreen';
+export { ManagerRegisterScreen } from './ManagerRegisterScreen';
+export { EmployeeRegisterScreen } from './EmployeeRegisterScreen';
 export { DashboardScreen } from './DashboardScreen';
+export { ManagerDashboardScreen } from './ManagerDashboardScreen';
+export { CompanyManagementScreen } from './CompanyManagementScreen';
+export { InvitationsManagementScreen } from './InvitationsManagementScreen';
+export { EmployeesApprovalScreen } from './EmployeesApprovalScreen';

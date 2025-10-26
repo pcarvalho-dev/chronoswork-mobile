@@ -1,15 +1,18 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { api } from '../lib/api';
-import type { User, RegisterData } from '../types';
+import type { User, RegisterData, ManagerRegisterData, EmployeeRegisterData, ManagerRegisterResponse, EmployeeRegisterResponse } from '../types';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
+  registerManager: (managerData: ManagerRegisterData) => Promise<ManagerRegisterResponse>;
+  registerEmployee: (employeeData: EmployeeRegisterData) => Promise<EmployeeRegisterResponse>;
   logout: () => Promise<void>;
   refreshUserProfile: () => Promise<void>;
   isAuthenticated: boolean;
+  isManager: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,6 +64,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(response.user);
   };
 
+  const registerManager = async (managerData: ManagerRegisterData) => {
+    const response = await api.registerManager(managerData);
+    setUser(response.user);
+    return response;
+  };
+
+  const registerEmployee = async (employeeData: EmployeeRegisterData) => {
+    const response = await api.registerEmployee(employeeData);
+    setUser(response.user);
+    return response;
+  };
+
   const logout = async () => {
     try {
       await api.logout();
@@ -86,9 +101,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     login,
     register,
+    registerManager,
+    registerEmployee,
     logout,
     refreshUserProfile,
     isAuthenticated: !!user,
+    isManager: user?.role === 'manager',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -24,6 +24,10 @@ type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Dashboard: undefined;
+  ManagerDashboard: undefined;
+  CompanyManagement: undefined;
+  InvitationsManagement: undefined;
+  EmployeesApproval: undefined;
 };
 
 type DashboardScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Dashboard'>;
@@ -33,7 +37,7 @@ interface DashboardScreenProps {
 }
 
 export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) => {
-  const { user, logout } = useAuth();
+  const { user, logout, isManager } = useAuth();
   const [timeLogs, setTimeLogs] = useState<TimeLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -421,6 +425,48 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
             <Text style={styles.logoutText}>Sair</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Manager Navigation */}
+        {isManager && (
+          <Card style={styles.managerCard}>
+            <Text style={styles.managerTitle}>Painel do Gestor</Text>
+            <Text style={styles.managerSubtitle}>Gerencie sua empresa e funcionários</Text>
+            
+            <View style={styles.managerActions}>
+              <Button
+                variant="primary"
+                onPress={() => navigation.navigate('ManagerDashboard')}
+                style={styles.managerButton}
+              >
+                Dashboard do Gestor
+              </Button>
+              
+              <View style={styles.managerQuickActions}>
+                <Button
+                  variant="secondary"
+                  onPress={() => navigation.navigate('CompanyManagement')}
+                  style={styles.quickActionButton}
+                >
+                  Empresa
+                </Button>
+                <Button
+                  variant="secondary"
+                  onPress={() => navigation.navigate('InvitationsManagement')}
+                  style={styles.quickActionButton}
+                >
+                  Convites
+                </Button>
+                <Button
+                  variant="secondary"
+                  onPress={() => navigation.navigate('EmployeesApproval')}
+                  style={styles.quickActionButton}
+                >
+                  Aprovações
+                </Button>
+              </View>
+            </View>
+          </Card>
+        )}
 
         {/* Check In/Out Card */}
         <Card style={styles.mainCard}>
@@ -856,5 +902,35 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     fontWeight: fontWeight.medium,
     color: colors.warmGrey[900],
+  },
+  managerCard: {
+    marginBottom: spacing.lg,
+    backgroundColor: colors.primary[50],
+    borderColor: colors.primary[200],
+    borderWidth: 1,
+  },
+  managerTitle: {
+    fontSize: fontSize.lg,
+    fontWeight: fontWeight.bold,
+    color: colors.primary[700],
+    marginBottom: spacing.xs,
+  },
+  managerSubtitle: {
+    fontSize: fontSize.sm,
+    color: colors.primary[600],
+    marginBottom: spacing.md,
+  },
+  managerActions: {
+    gap: spacing.md,
+  },
+  managerButton: {
+    marginBottom: spacing.sm,
+  },
+  managerQuickActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  quickActionButton: {
+    flex: 1,
   },
 });

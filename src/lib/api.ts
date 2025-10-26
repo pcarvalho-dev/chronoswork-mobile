@@ -8,6 +8,15 @@ import type {
   AuthResponse,
   RefreshTokenResponse,
   ProfileResponse,
+  Company,
+  Invitation,
+  ManagerRegisterData,
+  EmployeeRegisterData,
+  ManagerRegisterResponse,
+  EmployeeRegisterResponse,
+  UpdateCompanyData,
+  CreateInvitationData,
+  InvitationsResponse,
 } from '../types';
 
 // API client utility for React Native
@@ -144,6 +153,17 @@ class ApiClient {
         throw new Error('Tempo de resposta excedido. Verifique sua conexão.');
       }
 
+      // Handle network errors specifically
+      if (error instanceof TypeError && error.message === 'Network request failed') {
+        console.error('Network error:', error);
+        console.error('Possible causes:');
+        console.error('1. Backend not running on', this.baseURL);
+        console.error('2. Device not on same network');
+        console.error('3. Firewall blocking the request');
+        console.error('4. Wrong IP address in config');
+        throw new Error('Falha na conexão com o servidor. Verifique se o backend está rodando e se você está na mesma rede.');
+      }
+
       console.error('API request failed:', error);
       throw error;
     }
@@ -210,6 +230,86 @@ class ApiClient {
 
   async getProfile(): Promise<ProfileResponse> {
     return this.request<ProfileResponse>('/auth/profile', {}, true);
+  }
+
+  // Manager registration
+  async registerManager(managerData: ManagerRegisterData): Promise<ManagerRegisterResponse> {
+    const response = await this.request<ManagerRegisterResponse>('/auth/register-manager', {
+      method: 'POST',
+      body: JSON.stringify(managerData),
+    });
+    if (response.accessToken && response.refreshToken) {
+      await this.setTokens(response.accessToken, response.refreshToken);
+    }
+    return response;
+  }
+
+  // Employee registration
+  async registerEmployee(employeeData: EmployeeRegisterData): Promise<EmployeeRegisterResponse> {
+    return this.request<EmployeeRegisterResponse>('/auth/register-employee', {
+      method: 'POST',
+      body: JSON.stringify(employeeData),
+    });
+  }
+
+  // Company management
+  async getCompany(): Promise<{ company: Company }> {
+    return this.request<{ company: Company }>('/manager/company', {}, true);
+  }
+
+  async updateCompany(companyData: UpdateCompanyData): Promise<{ company: Company }> {
+    return this.request<{ company: Company }>('/manager/company', {
+      method: 'PUT',
+      body: JSON.stringify(companyData),
+    }, true);
+  }
+
+  // Invitation management
+  async createInvitation(invitationData: CreateInvitationData): Promise<{ invitation: Invitation }> {
+    return this.request<{ invitation: Invitation }>('/manager/invitations', {
+      method: 'POST',
+      body: JSON.stringify(invitationData),
+    }, true);
+  }
+
+  async getInvitations(page: number = 1, limit: number = 10, status?: string): Promise<InvitationsResponse> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (status) {
+      params.append('status', status);
+    }
+    return this.request<InvitationsResponse>(`/manager/invitations?${params}`, {}, true);
+  }
+
+  async cancelInvitation(invitationId: number): Promise<{ message: string }> {
+    return this.request<{ message: string }>(`/manager/invitations/${invitationId}`, {
+      method: 'DELETE',
+    }, true);
+  }
+
+  // Employee approval
+  async getPendingEmployees(page: number = 1, limit: number = 10, search?: string): Promise<{ users: User[]; pagination: any }> {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+    if (search) {
+      params.append('search', search);
+    }
+    return this.request<{ users: User[]; pagination: any }>(`/manager/employees/pending?${params}`, {}, true);
+  }
+
+  async approveEmployee(employeeId: string, approved: boolean, notes?: string): Promise<{ message: string }> {
+    return this.request<{ message: string }>('/manager/employees/approve', {
+      method: 'POST',
+      body: JSON.stringify({
+        employeeId,
+        approved,
+        notes,
+      }),
+    }, true);
   }
 
   // Time log endpoints

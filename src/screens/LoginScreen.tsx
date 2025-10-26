@@ -18,6 +18,8 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 type RootStackParamList = {
   Login: undefined;
   Register: undefined;
+  ManagerRegister: undefined;
+  EmployeeRegister: undefined;
   Dashboard: undefined;
 };
 
@@ -129,6 +131,28 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 <Text style={styles.footerLink}>Cadastre-se</Text>
               </TouchableOpacity>
             </View>
+
+            <View style={styles.registerOptions}>
+              <Text style={styles.registerOptionsTitle}>Ou escolha seu tipo de cadastro:</Text>
+              
+              <Button
+                variant="secondary"
+                onPress={() => navigation.navigate('ManagerRegister')}
+                disabled={loading}
+                style={styles.registerOptionButton}
+              >
+                Sou Gestor
+              </Button>
+              
+              <Button
+                variant="secondary"
+                onPress={() => navigation.navigate('EmployeeRegister')}
+                disabled={loading}
+                style={styles.registerOptionButton}
+              >
+                Sou Funcionário
+              </Button>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -186,5 +210,23 @@ const styles = StyleSheet.create({
     fontSize: fontSize.sm,
     color: colors.primary[600],
     fontWeight: fontWeight.semibold,
+  },
+  registerOptions: {
+    marginTop: spacing.lg,
+    padding: spacing.md,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.warmGrey[200],
+  },
+  registerOptionsTitle: {
+    fontSize: fontSize.sm,
+    color: colors.warmGrey[700],
+    textAlign: 'center',
+    marginBottom: spacing.md,
+    fontWeight: fontWeight.medium,
+  },
+  registerOptionButton: {
+    marginBottom: spacing.sm,
   },
 });
