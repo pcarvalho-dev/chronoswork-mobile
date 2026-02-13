@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number;
   name: string;
   email: string;
   cpf?: string;
@@ -39,14 +39,14 @@ export interface User {
   isActive?: boolean;
   isApproved?: boolean;
   role?: 'manager' | 'employee';
-  companyId?: string;
+  companyId?: number;
   company?: Company;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface TimeLog {
-  id: string;
+  id: number;
   checkIn: string;
   checkOut: string | null;
   checkInPhoto: string;
@@ -61,7 +61,7 @@ export interface TimeLog {
 }
 
 export interface Company {
-  id: string;
+  id: number;
   name: string;
   cnpj: string;
   corporateName?: string;
@@ -89,7 +89,13 @@ export interface Invitation {
   position?: string;
   department?: string;
   isUsed: boolean;
+  isActive: boolean;
+  status?: 'pending' | 'accepted' | 'cancelled' | 'expired';
   expiresAt?: string;
+  usedAt?: string | null;
+  companyId: number;
+  createdById: number;
+  usedById?: number;
   createdAt: string;
   updatedAt: string;
 }

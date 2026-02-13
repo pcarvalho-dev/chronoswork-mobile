@@ -30,13 +30,13 @@ export const colors = {
   success: '#22c55e', // Green matching web
   error: '#ef4444',
   warning: '#f59e0b',
-  // Gradient colors from web
+  // Gradient colors matching web
   gradient: {
-    purple: '#667eea',
-    purpleDark: '#764ba2',
-    bluePale: '#e0e7ff',
-    pinkPale: '#fce7f3',
-    purplePale: '#ddd6fe',
+    start: '#2563eb',
+    end: '#0891b2',
+    bluePale: '#dbeafe',
+    cyanPale: '#cffafe',
+    skyPale: '#e0f2fe',
   },
 };
 

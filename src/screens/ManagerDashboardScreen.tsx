@@ -31,7 +31,7 @@ interface ManagerDashboardScreenProps {
 }
 
 export const ManagerDashboardScreen: React.FC<ManagerDashboardScreenProps> = ({ navigation }) => {
-  const { user, api } = useAuth();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [company, setCompany] = useState<Company | null>(null);
@@ -61,7 +61,7 @@ export const ManagerDashboardScreen: React.FC<ManagerDashboardScreenProps> = ({ 
       // Calculate stats
       setStats({
         totalInvitations: invitationsResponse.pagination.total,
-        pendingInvitations: invitationsResponse.invitations.filter(inv => inv.status === 'pending').length,
+        pendingInvitations: invitationsResponse.invitations.filter((inv: Invitation) => !inv.isUsed && inv.isActive).length,
         approvedEmployees: 0, // This would need to be calculated from another endpoint
         pendingApprovals: employeesResponse.users.length,
       });
@@ -103,7 +103,7 @@ export const ManagerDashboardScreen: React.FC<ManagerDashboardScreenProps> = ({ 
 
   return (
     <LinearGradient
-      colors={[colors.gradient.bluePale, colors.gradient.pinkPale, colors.gradient.purplePale]}
+      colors={[colors.gradient.bluePale, colors.gradient.cyanPale, colors.gradient.skyPale]}
       locations={[0, 0.5, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -181,19 +181,19 @@ export const ManagerDashboardScreen: React.FC<ManagerDashboardScreenProps> = ({ 
                   <View style={styles.invitationInfo}>
                     <Text style={styles.invitationEmail}>{invitation.email}</Text>
                     <Text style={styles.invitationStatus}>
-                      Status: {invitation.status === 'pending' ? 'Pendente' : 
-                              invitation.status === 'accepted' ? 'Aceito' : 'Cancelado'}
+                      Status: {invitation.isUsed ? 'Aceito' :
+                              !invitation.isActive ? 'Cancelado' : 'Pendente'}
                     </Text>
                   </View>
                   <View style={[
                     styles.statusBadge,
-                    invitation.status === 'pending' && styles.statusPending,
-                    invitation.status === 'accepted' && styles.statusAccepted,
-                    invitation.status === 'cancelled' && styles.statusCancelled,
+                    !invitation.isUsed && invitation.isActive && styles.statusPending,
+                    invitation.isUsed && styles.statusAccepted,
+                    !invitation.isActive && styles.statusCancelled,
                   ]}>
                     <Text style={styles.statusText}>
-                      {invitation.status === 'pending' ? 'P' : 
-                       invitation.status === 'accepted' ? 'A' : 'C'}
+                      {invitation.isUsed ? 'A' :
+                       !invitation.isActive ? 'C' : 'P'}
                     </Text>
                   </View>
                 </View>

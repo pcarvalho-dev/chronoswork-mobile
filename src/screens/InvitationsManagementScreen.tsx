@@ -10,7 +10,6 @@ import {
   Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Button, Input, Card, Loading } from '../components';
 import { colors, spacing, fontSize, fontWeight } from '../theme';
@@ -32,7 +31,7 @@ interface InvitationsManagementScreenProps {
 }
 
 export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenProps> = ({ navigation }) => {
-  const { api } = useAuth();
+  // api imported directly from lib/api
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [invitations, setInvitations] = useState<Invitation[]>([]);
@@ -131,6 +130,13 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
     );
   };
 
+  const getInvitationStatus = (invitation: Invitation): string => {
+    if (invitation.isUsed) return 'accepted';
+    if (!invitation.isActive) return 'cancelled';
+    if (invitation.expiresAt && new Date(invitation.expiresAt) < new Date()) return 'expired';
+    return 'pending';
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -138,6 +144,7 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
       case 'accepted':
         return colors.success[600];
       case 'cancelled':
+      case 'expired':
         return colors.error[600];
       default:
         return colors.warmGrey[600];
@@ -152,6 +159,8 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
         return 'Aceito';
       case 'cancelled':
         return 'Cancelado';
+      case 'expired':
+        return 'Expirado';
       default:
         return status;
     }
@@ -178,7 +187,7 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
 
   return (
     <LinearGradient
-      colors={[colors.gradient.bluePale, colors.gradient.pinkPale, colors.gradient.purplePale]}
+      colors={[colors.gradient.bluePale, colors.gradient.cyanPale, colors.gradient.skyPale]}
       locations={[0, 0.5, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
@@ -255,29 +264,29 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
                       Criado em: {formatDate(invitation.createdAt)}
                     </Text>
                     <Text style={styles.invitationExpiry}>
-                      Expira em: {formatDate(invitation.expiresAt)}
+                      Expira em: {invitation.expiresAt ? formatDate(invitation.expiresAt) : '-'}
                     </Text>
                   </View>
                   <View style={styles.invitationStatus}>
                     <View
                       style={[
                         styles.statusBadge,
-                        { backgroundColor: getStatusColor(invitation.status) + '20' },
+                        { backgroundColor: getStatusColor(getInvitationStatus(invitation)) + '20' },
                       ]}
                     >
                       <Text
                         style={[
                           styles.statusText,
-                          { color: getStatusColor(invitation.status) },
+                          { color: getStatusColor(getInvitationStatus(invitation)) },
                         ]}
                       >
-                        {getStatusText(invitation.status)}
+                        {getStatusText(getInvitationStatus(invitation))}
                       </Text>
                     </View>
                   </View>
                 </View>
 
-                {invitation.status === 'pending' && (
+                {getInvitationStatus(invitation) === 'pending' && (
                   <View style={styles.invitationActions}>
                     <Button
                       variant="secondary"
@@ -362,7 +371,7 @@ export const InvitationsManagementScreen: React.FC<InvitationsManagementScreenPr
         presentationStyle="pageSheet"
       >
         <LinearGradient
-          colors={[colors.gradient.bluePale, colors.gradient.pinkPale, colors.gradient.purplePale]}
+          colors={[colors.gradient.bluePale, colors.gradient.cyanPale, colors.gradient.skyPale]}
           locations={[0, 0.5, 1]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

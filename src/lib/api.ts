@@ -79,9 +79,9 @@ class ApiClient {
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
+      ...(options.headers as Record<string, string>),
     };
 
     // Add Authorization header if useAuth is true
@@ -301,11 +301,11 @@ class ApiClient {
     return this.request<{ users: User[]; pagination: any }>(`/manager/employees/pending?${params}`, {}, true);
   }
 
-  async approveEmployee(employeeId: string, approved: boolean, notes?: string): Promise<{ message: string }> {
+  async approveEmployee(userId: number, approved: boolean, notes?: string): Promise<{ message: string }> {
     return this.request<{ message: string }>('/manager/employees/approve', {
       method: 'POST',
       body: JSON.stringify({
-        employeeId,
+        userId,
         approved,
         notes,
       }),

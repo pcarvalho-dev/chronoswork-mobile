@@ -9,7 +9,6 @@ import {
   RefreshControl,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import { Button, Input, Card, Loading } from '../components';
 import { colors, spacing, fontSize, fontWeight } from '../theme';
@@ -31,7 +30,7 @@ interface CompanyManagementScreenProps {
 }
 
 export const CompanyManagementScreen: React.FC<CompanyManagementScreenProps> = ({ navigation }) => {
-  const { api } = useAuth();
+  // api imported directly from lib/api
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -151,7 +150,7 @@ export const CompanyManagementScreen: React.FC<CompanyManagementScreenProps> = (
     try {
       const updateData: UpdateCompanyData = {
         name: formData.name,
-        cnpj: formData.cnpj.replace(/\D/g, ''),
+        cnpj: (formData.cnpj ?? '').replace(/\D/g, ''),
         // Only include fields that have values
         ...(formData.corporateName && { corporateName: formData.corporateName }),
         ...(formData.email && { email: formData.email }),
@@ -220,7 +219,7 @@ export const CompanyManagementScreen: React.FC<CompanyManagementScreenProps> = (
 
   return (
     <LinearGradient
-      colors={[colors.gradient.bluePale, colors.gradient.pinkPale, colors.gradient.purplePale]}
+      colors={[colors.gradient.bluePale, colors.gradient.cyanPale, colors.gradient.skyPale]}
       locations={[0, 0.5, 1]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}

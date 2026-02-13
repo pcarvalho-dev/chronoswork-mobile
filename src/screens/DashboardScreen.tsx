@@ -403,7 +403,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({ navigation }) 
       />
 
       <LinearGradient
-        colors={[colors.gradient.bluePale, colors.gradient.pinkPale, colors.gradient.purplePale]}
+        colors={[colors.gradient.bluePale, colors.gradient.cyanPale, colors.gradient.skyPale]}
         locations={[0, 0.5, 1]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
